@@ -1,0 +1,39 @@
+{
+  "name": "crime-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "seed": "npx tsx scripts/seed-db.ts",
+    "ingest": "npx tsx scripts/ingest.ts"
+  },
+  "dependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/d3-scale": "^4.0.9",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.17",
+    "better-sqlite3": "^12.6.2",
+    "clsx": "^2.1.1",
+    "d3-scale": "^4.0.2",
+    "next": "^14.2.35",
+    "postcss": "^8.4.33",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-simple-maps": "^3.0.0",
+    "recharts": "^2.12.0",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.2.0",
+    "tsx": "^4.7.0"
+  }
+}
