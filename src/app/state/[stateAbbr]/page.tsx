@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { STATE_ABBRS, OFFENSE_TYPES, formatNumber, formatRate } from "@/lib/utils";
+import { fetchJson } from "@/lib/data";
 import TrendLineChart from "@/components/charts/TrendLineChart";
 import DemographicBarChart from "@/components/charts/DemographicBarChart";
 import OffenseBreakdownChart from "@/components/charts/OffenseBreakdownChart";
@@ -35,8 +36,7 @@ export default function StatePage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/state/${stateAbbr}`)
-      .then((r) => r.json())
+    fetchJson<StateData>(`state/${stateAbbr}.json`)
       .then(setData)
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -60,7 +60,6 @@ export default function StatePage() {
     );
   }
 
-  // Compute trend data
   const offenseCol: Record<string, string> = {
     "violent-crime": "violent_crime",
     "homicide": "homicide",
@@ -86,20 +85,17 @@ export default function StatePage() {
     };
   });
 
-  // Latest stats
   const latest = data.estimates[data.estimates.length - 1];
   const prev = data.estimates.length > 1 ? data.estimates[data.estimates.length - 2] : null;
   const latestRate = latest?.population > 0 ? (latest[col] / latest.population) * 100000 : 0;
   const prevRate = prev?.population > 0 ? (prev[col] / prev.population) * 100000 : 0;
   const pctChange = prevRate > 0 ? (latestRate - prevRate) / prevRate : 0;
 
-  // Demographics for selected offense
   const demoByVar = (variable: string) =>
     data.demographics
       .filter((d: any) => d.offense === offense && d.variable === variable)
       .map((d: any) => ({ value: d.value, count: d.count }));
 
-  // Offense breakdown from latest year
   const offenseBreakdown = latest
     ? [
         { name: "Homicide", value: latest.homicide || 0 },
@@ -120,7 +116,6 @@ export default function StatePage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      {/* Header */}
       <div className="mb-6">
         <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
           &larr; Back to national map
@@ -128,12 +123,10 @@ export default function StatePage() {
         <h1 className="mt-2 text-3xl font-bold tracking-tight">{stateName}</h1>
       </div>
 
-      {/* Completeness warning */}
       <div className="mb-6">
         <DataCompletenessIndicator participation={data.participation} />
       </div>
 
-      {/* Stats */}
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatsCard
           title={`${offenseLabel} Rate`}
@@ -157,7 +150,6 @@ export default function StatePage() {
         />
       </div>
 
-      {/* Offense selector */}
       <div className="mb-4">
         <select
           value={offense}
@@ -170,7 +162,6 @@ export default function StatePage() {
         </select>
       </div>
 
-      {/* Tabs */}
       <div className="mb-6 flex gap-1 rounded-lg border border-border bg-muted/50 p-1">
         {tabs.map((t) => (
           <button
@@ -187,51 +178,35 @@ export default function StatePage() {
         ))}
       </div>
 
-      {/* Tab content */}
       {tab === "trends" && (
         <div className="rounded-lg border border-border bg-card p-4">
-          <h2 className="mb-4 text-lg font-semibold">
-            {offenseLabel} Rate Over Time
-          </h2>
-          <TrendLineChart
-            data={trendData}
-            stateName={stateName}
-            offenseLabel={offenseLabel}
-          />
+          <h2 className="mb-4 text-lg font-semibold">{offenseLabel} Rate Over Time</h2>
+          <TrendLineChart data={trendData} stateName={stateName} offenseLabel={offenseLabel} />
         </div>
       )}
 
       {tab === "demographics" && (
         <div className="space-y-6">
-          <div className="rounded-lg border border-border bg-card p-4">
-            <DemographicBarChart data={demoByVar("race")} title="Offender Race" />
-          </div>
-          <div className="rounded-lg border border-border bg-card p-4">
-            <DemographicBarChart data={demoByVar("sex")} title="Offender Sex" />
-          </div>
-          <div className="rounded-lg border border-border bg-card p-4">
-            <DemographicBarChart data={demoByVar("age")} title="Offender Age Group" />
-          </div>
-          <div className="rounded-lg border border-border bg-card p-4">
-            <DemographicBarChart data={demoByVar("ethnicity")} title="Offender Ethnicity" />
-          </div>
+          {["race", "sex", "age", "ethnicity"].map((v) => {
+            const d = demoByVar(v);
+            return d.length > 0 ? (
+              <div key={v} className="rounded-lg border border-border bg-card p-4">
+                <DemographicBarChart data={d} title={`Offender ${v.charAt(0).toUpperCase() + v.slice(1)}`} />
+              </div>
+            ) : null;
+          })}
         </div>
       )}
 
       {tab === "offenses" && (
         <div className="rounded-lg border border-border bg-card p-4">
-          <OffenseBreakdownChart
-            data={offenseBreakdown}
-            title={`Violent Crime Breakdown (${latest?.year || ""})`}
-          />
+          <OffenseBreakdownChart data={offenseBreakdown} title={`Violent Crime Breakdown (${latest?.year || ""})`} />
         </div>
       )}
 
       {tab === "agencies" && (
         <div>
-          <h2 className="mb-4 text-lg font-semibold">
-            Agencies in {stateName}
-          </h2>
+          <h2 className="mb-4 text-lg font-semibold">Agencies in {stateName}</h2>
           <AgencyTable agencies={data.agencies} />
         </div>
       )}

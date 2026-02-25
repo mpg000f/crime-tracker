@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "npx tsx scripts/seed-db.ts",
-    "ingest": "npx tsx scripts/ingest.ts"
+    "ingest": "npx tsx scripts/ingest.ts",
+    "generate": "npx tsx scripts/generate-static.ts",
+    "deploy": "next build && touch out/.nojekyll && gh-pages -d out -t true"
   },
   "dependencies": {
     "@types/better-sqlite3": "^7.6.13",
@@ -34,6 +36,7 @@
   "devDependencies": {
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.2.0",
+    "gh-pages": "^6.3.0",
     "tsx": "^4.7.0"
   }
 }

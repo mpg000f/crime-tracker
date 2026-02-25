@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 interface Agency {
   ori: string;
   agency_name: string;
@@ -29,11 +27,7 @@ export default function AgencyTable({ agencies }: Props) {
         <tbody>
           {agencies.slice(0, 50).map((a) => (
             <tr key={a.ori} className="border-b border-border/50 hover:bg-muted/30">
-              <td className="px-3 py-2">
-                <Link href={`/agency/${a.ori}`} className="font-medium hover:underline">
-                  {a.agency_name}
-                </Link>
-              </td>
+              <td className="px-3 py-2 font-medium">{a.agency_name}</td>
               <td className="px-3 py-2 text-muted-foreground">{a.county_name}</td>
               <td className="px-3 py-2 text-muted-foreground">{a.agency_type}</td>
               <td className="px-3 py-2">
